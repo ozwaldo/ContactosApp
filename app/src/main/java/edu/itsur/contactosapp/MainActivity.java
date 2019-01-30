@@ -13,6 +13,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import static android.provider.ContactsContract.*;
+
 public class MainActivity extends AppCompatActivity {
 
     private final int PICK_CONTACT_REQUEST = 1;
@@ -35,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
         ImageView foto = (ImageView) findViewById(R.id.fotoContacto);
 
         nombre.setText(getNombre(uri));
+        telefono.setText(getTelefono(uri));
     }
 
     @Override
@@ -68,6 +71,44 @@ public class MainActivity extends AppCompatActivity {
 
         return nombre;
     }
+
+    private String getTelefono(Uri uri) {
+        String id = null;
+        String telefono = null;
+
+        Cursor contactoCursor = getContentResolver().query(
+                uri,
+                new String[]{Contacts._ID},
+                null,
+                null,
+                null
+        );
+
+        if (contactoCursor.moveToFirst()){
+            id = contactoCursor.getString(0);
+        }
+
+        contactoCursor.close();
+
+        String selectionArgs =
+                CommonDataKinds.Phone.CONTACT_ID + " = ? AND " +
+                        CommonDataKinds.Phone.TYPE + " = " +
+                        CommonDataKinds.Phone.TYPE_MOBILE;
+
+        Cursor telefonoCursor = getContentResolver().query(
+                CommonDataKinds.Phone.CONTENT_URI,
+                new String[] {CommonDataKinds.Phone.NUMBER},
+                selectionArgs,
+                new String[]{id},
+                null
+        );
+        if (telefonoCursor.moveToFirst()){
+            telefono = telefonoCursor.getString(0);
+        }
+
+        return telefono;
+    }
+
 
 }
 
